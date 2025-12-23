@@ -1,0 +1,63 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Android Studio
+/.idea/
+*.iws
+*.ipr
+out/
+
+# Gradle
+.gradle/
+build/
+*/build/
+
+# Local configuration files
+local.properties
+app/local.properties
+
+# Generated files
+bin/
+gen/
+release/
+
+# Keystore files
+*.jks
+*.keystore
+
+# Log files
+*.log
+
+# APK files (optional - 如果不想上传编译好的APK)
+*.apk
+*.aab
+
+# Backup files
+*.backup
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Large model files (GitHub有100MB限制)
+# 如果模型文件太大，考虑使用 Git LFS 或外部存储
+# app/src/main/assets/*.onnx

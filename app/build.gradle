@@ -1,0 +1,128 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace 'com.lanyan.ajpPlugin.ddddocr'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.lanyan.ajpPlugin.ddddocr"
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        
+        // 只保留 arm64-v8a 架构，减小 APK 体积
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+    }
+
+    sourceSets {
+        main {
+            assets.srcDirs = ['src/main/assets']
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
+        
+        debug {
+            minifyEnabled false
+            shrinkResources false
+        }
+    }
+    
+    // 产品变体 - 不同功能组合
+    flavorDimensions "version"
+    productFlavors {
+        // 完整版 - 包含所有功能
+        full {
+            dimension "version"
+            versionNameSuffix "-full"
+        }
+        
+        // 轻量版 - 只有OCR功能
+        lite {
+            dimension "version"
+            versionNameSuffix "-lite"
+            // 在代码中通过 BuildConfig.FLAVOR 判断
+        }
+        
+        // 基础版 - OCR + 滑块
+        basic {
+            dimension "version" 
+            versionNameSuffix "-basic"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+    
+    // 打包优化
+    packagingOptions {
+        // 排除重复文件
+        pickFirst '**/libc++_shared.so'
+        pickFirst '**/libjsc.so'
+        
+        // 排除不需要的文件
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/*.kotlin_module'
+        
+        // 根据构建变体排除模型文件
+        if (project.hasProperty("android.injected.build.model.only.versioned")) {
+            // Lite 版本排除目标检测模型
+            exclude 'assets/common_det.onnx'
+        }
+    }
+}
+
+dependencies {
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.constraintlayout
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+    
+    // 核心依赖 - 必需
+    implementation('com.microsoft.onnxruntime:onnxruntime-android:1.12.1') {
+        // 排除不需要的架构，只保留 arm64-v8a
+        exclude group: 'com.microsoft.onnxruntime', module: 'onnxruntime-android-x86'
+        exclude group: 'com.microsoft.onnxruntime', module: 'onnxruntime-android-x86_64'
+        exclude group: 'com.microsoft.onnxruntime', module: 'onnxruntime-android-armeabi-v7a'
+    }
+    implementation 'com.github.hyb1996:Auto.js-Plugin-SDK:0.2'
+    
+    // 可选依赖 - 根据需要启用
+    // OpenCV - 只有颜色过滤和滑块功能需要
+    implementation('com.quickbirdstudios:opencv:4.5.3.0') {
+        // 只保留 arm64-v8a 架构
+        exclude group: 'org.opencv', module: 'opencv-android-x86'
+        exclude group: 'org.opencv', module: 'opencv-android-x86_64'  
+        exclude group: 'org.opencv', module: 'opencv-android-armeabi-v7a'
+    }
+    
+    // 轻量级替代方案
+    implementation 'com.caverock:androidsvg-aar:1.4'  // SVG支持，如果不需要可删除
+    // implementation 'org.mozilla:rhino:1.7.14'        // JS引擎，如果不需要可删除
+    // implementation 'androidx.documentfile:documentfile:1.0.1'  // 文件支持
+}
